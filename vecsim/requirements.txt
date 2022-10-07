@@ -1,0 +1,4 @@
+redis
+numpy
+pandas
+sentence_transformers
