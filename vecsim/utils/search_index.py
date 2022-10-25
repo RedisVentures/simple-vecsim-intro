@@ -35,88 +35,24 @@ class SearchIndex:
     manegement, and query construction.
     """
     escaper = TokenEscaper()
-    
-    def __init__(self, index_name: str):
+
+    def __init__(self, index_name: str, redis_conn: Redis):
         self.index_name = index_name
+        self.redis_conn = redis_conn
 
-    async def create_flat(
+    async def create(
         self,
         *fields,
-        redis_conn: Redis,
-        number_of_vectors: int,
-        prefix: str,
-        distance_metric: str='L2'
-    ):
-        """
-        Create a FLAT aka brute force style index.
-
-        Args:
-            redis_conn (Redis): Redis connection object.
-            number_of_vectors (int): Count of the number of initial vectors.
-            prefix (str): key prefix to use for RediSearch index creation.
-            distance_metric (str, optional): Distance metric to use for Vector Search. Defaults to 'L2'.
-        """
-        vector_field = VectorField(
-            "vector",
-            "FLAT", {
-                "TYPE": "FLOAT32",
-                "DIM": 768,
-                "DISTANCE_METRIC": distance_metric,
-                "INITIAL_CAP": number_of_vectors,
-                "BLOCK_SIZE": number_of_vectors
-            }
-        )
-        await self._create(
-            *fields,
-            vector_field,
-            redis_conn=redis_conn,
-            prefix=prefix
-        )
-
-    async def create_hnsw(
-        self,
-        *fields,
-        redis_conn: Redis,
-        number_of_vectors: int,
-        prefix: str,
-        distance_metric: str='COSINE'
-    ):
-        """
-        Create an approximate NN index via HNSW.
-
-        Args:
-            redis_conn (Redis): Redis connection object.
-            number_of_vectors (int): Count of the number of initial vectors.
-            prefix (str): key prefix to use for RediSearch index creation.
-            distance_metric (str, optional): Distance metric to use for Vector Search. Defaults to 'COSINE'.
-        """
-        vector_field = VectorField(
-            "vector",
-            "HNSW", {
-                "TYPE": "FLOAT32",
-                "DIM": 768,
-                "DISTANCE_METRIC": distance_metric,
-                "INITIAL_CAP": number_of_vectors,
-            }
-        )
-        await self._create(
-            *fields,
-            vector_field,
-            redis_conn=redis_conn,
-            prefix=prefix
-        )
-
-    async def _create(
-        self,
-        *fields,
-        redis_conn: Redis,
         prefix: str
     ):
         # Create Index
-        await redis_conn.ft(self.index_name).create_index(
+        await self.redis_conn.ft(self.index_name).create_index(
             fields = fields,
             definition= IndexDefinition(prefix=[prefix], index_type=IndexType.HASH)
         )
+
+    async def delete(self):
+        await self.redis_conn.ft(self.index_name).dropindex(delete_documents=True)
 
     def process_tags(self, categories: list, years: list) -> str:
         """
