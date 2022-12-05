@@ -28,7 +28,7 @@ with st.expander("About this demo:", expanded=False):
     """
     ## Vector Similarity Search
 
-    This demo allows you to search the database of claims using Vector Similarity Search via vector embeddings.
+    This demo allows you to search the subset of arXiv scholarly articles with natural language. Under the surface, Redis uses [vector similarity search](https://mlops.community/vector-similarity-search-from-basics-to-production/).
     """
     )
 
@@ -36,7 +36,7 @@ user_query = st.text_input("Query:", "intelligent autonomous vehicles")
 logging.info(f"search string: {user_query}")
 
 q = Query("*=>[KNN 10 @vector $vector AS result_score]")\
-    .return_fields("result_score", "title", "abstract")\
+    .return_fields("result_score", "title")\
     .dialect(2)\
     .sort_by("result_score", True)
 
@@ -45,6 +45,6 @@ query_vector = embeddings.make(user_query).astype(np.float32).tobytes()
 res = redis.ft(index_name).search(
     q, query_params={"vector": query_vector})
 
-df = pd.DataFrame([t.__dict__ for t in res.docs]).drop(columns=["payload"])
+df = pd.DataFrame([t.__dict__ for t in res.docs]).drop(columns=["payload", "id"])
 
-st.table(df)
+st.table(df[["title", "result_score"]])
