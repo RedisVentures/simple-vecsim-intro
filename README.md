@@ -14,10 +14,11 @@
 
 # Getting Started: **Redis Vector Similarity**
 This entry-level tutorial is meant to guide you through:
-- Setting up a RediSearch + Jupyter docker stack
+- Setting up a RediSearch + Jupyter + Streamlit docker stack
 - Creating text-based embeddings (vectors) from a sample/toy dataset
 - Storing vector data in RediSearch
 - Running vector queries and hybrid queries
+- Hosting a simple Streamlit UI
 
 ___
 
@@ -46,8 +47,8 @@ Check logs of a docker container with the id found in last step:
 $ docker logs {CONTAINER_ID} -f
 ```
 
-## Jupyter Notebooks
-We use Jupyter notebooks here to guide through the tutorial.
+## Jupyter Notebook
+We use Jupyter notebooks here to guide through the tutorial of loading data, creating embeddings, storing in Redis, and creating a search Schema.
 
 After running the `docker compose up` step, you should see a link in the logs like this:
 
@@ -55,4 +56,16 @@ After running the `docker compose up` step, you should see a link in the logs li
 
 Use the last URL listed... the one that has your own custom token -- not this exact one :)
 
+## Streamlit
+We've included a sample [Streamlit UI](http://localhost:8501/) that allows you to enter a search query and explore a subset of documents with AI-powered vector similarity search.
+
+The UI can be extended or modified to fit your schema and usecase. This just gives you a starting point!
+
+![streamlit](img/streamlit.png)
+
+
+> WARNING: Streamlit app only works once the data has been loaded to Redis. Use the Jupyter notebook for that (see above). Refresh the app once dataset is in Redis.
+
+## Full Example
+See our arXiv paper search demo/example that includes a full front end and backend system if you're ready for the next step.
 
