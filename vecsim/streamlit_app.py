@@ -35,16 +35,19 @@ with st.expander("About this demo:", expanded=False):
 user_query = st.text_input("Query:", "intelligent autonomous vehicles")
 logging.info(f"search string: {user_query}")
 
-q = Query("*=>[KNN 10 @vector $vector AS result_score]")\
-    .return_fields("result_score", "title")\
+q = Query("*=>[KNN 10 @vector $vector AS score]")\
+    .return_fields("score", "title")\
     .dialect(2)\
-    .sort_by("result_score", True)
+    .sort_by("score", True)
 
 query_vector = embeddings.make(user_query).astype(np.float32).tobytes()
 
 res = redis.ft(index_name).search(
     q, query_params={"vector": query_vector})
 
-df = pd.DataFrame([t.__dict__ for t in res.docs]).drop(columns=["payload", "id"])
+df = pd.DataFrame([t.__dict__ for t in res.docs])
 
-st.table(df[["title", "result_score"]])
+df["score"] = df["score"].apply(lambda s: 1 - float(s))
+df["link"] = df["id"].apply(lambda i: f"https://arxiv.org/pdf/{i.split(':')[1]}")
+
+st.table(df[["title", "score", "link"]])

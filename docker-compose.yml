@@ -2,6 +2,7 @@ version:  '3.7'
 
 services:
   redis:
+    container_name: redis
     build:
       context: ./redis-vector-db
       dockerfile: Dockerfile
@@ -22,6 +23,7 @@ services:
     environment:
       JUPYTER_ENABLE_LAB: "yes"
   streamlit:
+    container_name: streamlit
     build:
       context: ./vecsim
       dockerfile: ./Dockerfile
