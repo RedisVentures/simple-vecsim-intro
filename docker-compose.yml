@@ -1,11 +1,13 @@
-version:  '3'
+version:  '3.7'
+
 services:
   redis:
+    container_name: redis
     build:
       context: ./redis-vector-db
       dockerfile: Dockerfile
     volumes:
-      - ./redis-vector-db/data:/data/
+        - redis_data:/data
     ports:
       - 6379:6379
       - 8001:8001
@@ -16,5 +18,22 @@ services:
       - ./vecsim:/home/jovyan/vecsim
     ports:
       - 8888:8888
+    depends_on:
+      - "redis"
     environment:
       JUPYTER_ENABLE_LAB: "yes"
+  streamlit:
+    container_name: streamlit
+    build:
+      context: ./vecsim
+      dockerfile: ./Dockerfile
+    ports:
+      - 8501:8501
+    depends_on:
+      - "redis"
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
+
+volumes:
+  redis_data:

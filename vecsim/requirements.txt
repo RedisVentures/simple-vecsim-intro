@@ -1,4 +1,5 @@
 redis
+streamlit
 numpy
 pandas
 sentence_transformers
